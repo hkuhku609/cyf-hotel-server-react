@@ -1,23 +1,45 @@
-import logo from './logo.svg';
 import './App.css';
+import Left from './Left';
+import Right from './Right';
+import { useState, useEffect, useCallback } from 'react';
+import Loading from './Loading';
 
 function App() {
+  const [bookings, setBookings] = useState([]);
+  const [filteredBookings, setFilteredBookings] = useState([]);
+  const [state, setState] = useState({ isLoading: true, isError: false });
+
+  const fetchData = useCallback(async () => {
+    try {
+      const res = await fetch('https://susan-hotel-server.glitch.me/bookings/');
+      if (!res.ok) throw Error('Did not receive expected data');
+      const data = await res.json();
+      setState((prev) => ({ ...prev, isError: false }));
+      setBookings(data);
+      setFilteredBookings(data);
+    } catch (err) {
+      setState((prev) => ({ ...prev, isError: err.message }));
+      console.error(err.message);
+    } finally {
+      setState((prev) => ({ ...prev, isLoading: false }));
+    }
+  }, []);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className='App'>
+      <Left
+        callData={fetchData}
+        bookings={bookings}
+        setFilteredBookings={setFilteredBookings}
+      />
+      {state.isLoading && <Loading />}
+      {state.isError && <div className='right-container'>{state.isError}</div>}
+      {!state.isLoading && !state.isError && (
+        <Right data={filteredBookings} callData={fetchData} />
+      )}
     </div>
   );
 }
