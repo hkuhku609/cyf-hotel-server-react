@@ -1,13 +1,18 @@
 import './App.css';
 import Left from './Left';
 import Right from './Right';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Loading from './Loading';
 
 function App() {
   const [bookings, setBookings] = useState([]);
   const [filteredBookings, setFilteredBookings] = useState([]);
   const [state, setState] = useState({ isLoading: true, isError: false });
+
+  const messagesEndRef = useRef(null);
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
@@ -34,11 +39,16 @@ function App() {
         callData={fetchData}
         bookings={bookings}
         setFilteredBookings={setFilteredBookings}
+        scrollToBottom={scrollToBottom}
       />
       {state.isLoading && <Loading />}
       {state.isError && <div className='right-container'>{state.isError}</div>}
       {!state.isLoading && !state.isError && (
-        <Right data={filteredBookings} callData={fetchData} />
+        <Right
+          data={filteredBookings}
+          callData={fetchData}
+          messagesEndRef={messagesEndRef}
+        />
       )}
     </div>
   );

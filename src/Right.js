@@ -1,31 +1,38 @@
 import React, { useState } from 'react';
 import Edit from './Edit';
 
-const Right = ({ data, callData }) => {
+const Right = ({ data, callData, messagesEndRef }) => {
   const [updateSate, setUpdateState] = useState(-1);
   const [updatedBooking, setUpdatedBooking] = useState({});
   const [errorMsg, setErrorMsg] = useState('');
+
   const enterEditMode = (item) => {
     setErrorMsg('');
     setUpdateState(item.id);
   };
   const handleEdit = async (id) => {
     try {
-      const res = await fetch(`https://susan-hotel-server.glitch.me/bookings/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(updatedBooking),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const res = await fetch(
+        `https://susan-hotel-server.glitch.me/bookings/${id}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(updatedBooking),
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
       const data = await res.json();
       if (!res.ok) return setErrorMsg(data);
       reset();
+      callData();
     } catch (err) {
       console.error(err);
     }
   };
   const handleDelete = async (id) => {
     try {
-      await fetch(`https://susan-hotel-server.glitch.me/bookings/${id}`, { method: 'DELETE' });
+      await fetch(`https://susan-hotel-server.glitch.me/bookings/${id}`, {
+        method: 'DELETE'
+      });
       callData();
     } catch (err) {
       console.error(err);
@@ -35,7 +42,6 @@ const Right = ({ data, callData }) => {
     setErrorMsg('');
     setUpdateState(-1);
     setUpdatedBooking({});
-    callData();
   };
 
   return (
@@ -107,6 +113,7 @@ const Right = ({ data, callData }) => {
           </div>
         </div>
       ))}
+      <div ref={messagesEndRef} />
     </div>
   );
 };

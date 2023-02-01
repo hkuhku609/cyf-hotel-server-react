@@ -1,6 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useLayoutEffect
+} from 'react';
 
-const Left = ({ callData, setFilteredBookings, bookings }) => {
+const Left = ({ callData, setFilteredBookings, bookings, scrollToBottom }) => {
   const [booking, setBooking] = useState({
     title: '',
     firstName: '',
@@ -16,15 +21,19 @@ const Left = ({ callData, setFilteredBookings, bookings }) => {
   const handlePost = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('https://susan-hotel-server.glitch.me/bookings/', {
-        method: 'POST',
-        body: JSON.stringify(booking),
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const res = await fetch(
+        'https://susan-hotel-server.glitch.me/bookings/',
+        {
+          method: 'POST',
+          body: JSON.stringify(booking),
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
       const data = await res.json();
       if (!res.ok) return setErrorMsg(data);
       callData();
       clearInput();
+      scrollToBottom();
     } catch (err) {
       console.error(err);
     }
@@ -65,6 +74,9 @@ const Left = ({ callData, setFilteredBookings, bookings }) => {
       fetchSearchedData(name, value);
     }
   };
+  useLayoutEffect(() => {
+    scrollToBottom();
+  }, [bookings]);
 
   return (
     <div className='left-container'>
